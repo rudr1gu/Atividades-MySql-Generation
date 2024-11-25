@@ -39,7 +39,7 @@ VALUES  ("capitão", "pirata"),
 
 SELECT * FROM tb_personagens WHERE poder_ataque > 2000;
 
-SELECT * FROM tb_personagens WHERE poder_defesa > 1000 AND poder_defesa < 2000;
+SELECT * FROM tb_personagens WHERE poder_defesa BETWEEN 2000 AND 3000;
 
 
 SELECT nome FROM tb_personagens WHERE nome LIKE "%C%";
