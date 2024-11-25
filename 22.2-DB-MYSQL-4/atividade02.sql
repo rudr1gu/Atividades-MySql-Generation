@@ -12,9 +12,21 @@ CREATE TABLE tb_pizzas (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100),
     valor DECIMAL(10,2),
-    ingredientes VARCHAR(100),
     categoria_id BIGINT,
     FOREIGN KEY (categoria_id) REFERENCES tb_categorias(id)
+);
+
+CREATE TABLE tb_ingredientes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE tb_pizza_ingredientes (
+    pizza_id BIGINT,
+    ingrediente_id BIGINT,
+    PRIMARY KEY (pizza_id, ingrediente_id),
+    FOREIGN KEY (pizza_id) REFERENCES tb_pizzas(id),
+    FOREIGN KEY (ingrediente_id) REFERENCES tb_ingredientes(id)
 );
 
 INSERT INTO tb_categorias (tipo, categoria)
@@ -24,12 +36,35 @@ VALUES  ("salgada", "calabresa"),
         ("doce", "chocolate"),
         ("doce", "banana");
 
-INSERT INTO tb_pizzas (nome, valor, ingredientes, categoria_id)
-VALUES  ("calabresa", 40.00, "calabresa, cebola, tomate, mussarela", 1),
-        ("marguerita", 50.00, "mussarela, tomate, manjericão", 2),
-        ("portuguesa", 60.00, "presunto, mussarela, ovo, cebola, ervilha, azeitona", 3),
-        ("chocolate", 70.00, "chocolate, morango, leite condensado", 4),
-        ("banana", 80.00, "banana, canela, leite condensado", 5);
+INSERT INTO tb_pizzas (nome, valor, categoria_id)
+VALUES  ("calabresa", 40.00, 1),
+        ("marguerita", 50.00, 2),
+        ("portuguesa", 60.00, 3),
+        ("chocolate", 70.00, 4),
+        ("banana", 80.00, 5);
+
+INSERT INTO tb_ingredientes (nome)
+VALUES  ("calabresa"),
+        ("cebola"),
+        ("tomate"),
+        ("mussarela"),
+        ("manjericão"),
+        ("presunto"),
+        ("ovo"),
+        ("ervilha"),
+        ("azeitona"),
+        ("chocolate"),
+        ("morango"),
+        ("leite condensado"),
+        ("banana"),
+        ("canela");
+
+INSERT INTO tb_pizza_ingredientes (pizza_id, ingrediente_id)
+VALUES  (1, 1), (1, 2), (1, 3), (1, 4),
+        (2, 4), (2, 3), (2, 5),
+        (3, 6), (3, 4), (3, 7), (3, 2), (3, 8), (3, 9),
+        (4, 10), (4, 11), (4, 12),
+        (5, 13), (5, 14), (5, 12);
 
 SELECT * FROM tb_pizzas WHERE valor > 45.00;
 
@@ -37,8 +72,17 @@ SELECT * FROM tb_pizzas WHERE valor BETWEEN 50.00 AND 100.00;
 
 SELECT * FROM tb_pizzas WHERE nome LIKE "%M%";
 
-SELECT p.nome, p.valor, p.ingredientes, c.tipo, c.categoria FROM tb_pizzas p
-JOIN tb_categorias c ON p.categoria_id = c.id;
+SELECT p.nome, p.valor, GROUP_CONCAT(i.nome SEPARATOR ', ') AS ingredientes, c.tipo, c.categoria 
+FROM tb_pizzas p
+JOIN tb_categorias c ON p.categoria_id = c.id
+JOIN tb_pizza_ingredientes pi ON p.id = pi.pizza_id
+JOIN tb_ingredientes i ON pi.ingrediente_id = i.id
+GROUP BY p.id, p.nome, p.valor, c.tipo, c.categoria;
 
-SELECT p.nome, p.valor, p.ingredientes, c.tipo, c.categoria FROM tb_pizzas p
-JOIN tb_categorias c ON p.categoria_id = c.id WHERE c.tipo = "doce";
+SELECT p.nome, p.valor, GROUP_CONCAT(i.nome SEPARATOR ', ') AS ingredientes, c.tipo, c.categoria 
+FROM tb_pizzas p
+JOIN tb_categorias c ON p.categoria_id = c.id
+JOIN tb_pizza_ingredientes pi ON p.id = pi.pizza_id
+JOIN tb_ingredientes i ON pi.ingrediente_id = i.id
+WHERE c.tipo = "doce"
+GROUP BY p.id, p.nome, p.valor, c.tipo, c.categoria;
